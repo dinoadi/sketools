@@ -160,14 +160,68 @@ Klik **"Run"** untuk menjalankan SQL.
 ### Langkah 5: Copy API Keys
 
 1. Buka **Settings** → **API** di sidebar kiri
-2. Copy nilai-nilai berikut:
-   - **Project URL**: `https://your-project.supabase.co`
-   - **anon public**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
-   - **service_role secret**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+2. Anda akan melihat beberapa bagian:
+
+#### **Project URL**
+- Copy nilai di kolom **Project URL**
+- Format: `https://your-project.supabase.co`
+- Ini adalah URL untuk mengakses Supabase API
+
+#### **anon public key (Anon Key)**
+- Scroll ke bagian **Project API keys**
+- Copy nilai di kolom **anon public**
+- Format biasanya dimulai dengan: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` atau `sb_...`
+- **Ini adalah Public Key** yang bisa digunakan di client-side
+- Key ini aman untuk digunakan di browser (frontend)
+- Gunakan untuk: `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+#### **service_role secret key (Service Role Key)**
+- Di bagian yang sama, scroll ke bawah
+- Copy nilai di kolom **service_role secret**
+- Format biasanya dimulai dengan: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+- **Ini adalah Secret Key** yang HANYA untuk server-side
+- JANGAN PERNAH expose key ini ke client/browser!
+- Gunakan untuk: `SUPABASE_SERVICE_ROLE_KEY`
 
 ⚠️ **PENTING**: 
-- `anon public` key bisa digunakan di client-side
-- `service_role secret` key HANYA untuk server-side, jangan pernah expose ke client!
+- **anon public key** = Public Key (aman untuk client-side)
+- **service_role secret key** = Secret Key (HANYA untuk server-side)
+- Jangan pernah commit service_role secret key ke GitHub!
+- Jangan pernah gunakan service_role secret key di frontend code!
+
+### Contoh Environment Variables:
+
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...  # Public Key
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...  # Secret Key
+```
+
+### Cara Membedakan Anon Key vs Service Role Key:
+
+| Key Type | Prefix | Penggunaan | Keamanan |
+|-----------|---------|-------------|----------|
+| **anon public** | `eyJ...` atau `sb_...` | Client-side (frontend) | Aman untuk browser |
+| **service_role secret** | `eyJ...` | Server-side (backend) | RAHASIA, jangan expose |
+
+### Tips Tambahan:
+
+1. **Cek Key di Supabase Dashboard**:
+   - Buka: https://supabase.com/dashboard
+   - Pilih project Anda
+   - Klik **Settings** → **API**
+   - Anda akan melihat semua keys di sana
+
+2. **Jika Anda melihat key dengan prefix `sb_`**:
+   - Itu adalah **anon public key** (public key)
+   - Bisa digunakan untuk `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - Aman untuk client-side
+
+3. **Service Role Key**:
+   - Biasanya lebih panjang dari anon key
+   - Memiliki akses penuh ke database (bypass RLS)
+   - HANYA gunakan di server-side code (API routes, server components)
 
 ---
 
