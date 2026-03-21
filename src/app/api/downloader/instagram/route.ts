@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireApiUser } from "@/lib/auth/api-user";
 import { createJob } from "@/lib/firestore/repositories";
+import { getInstagramReelsByUsername, generateMockInstagramReels } from "@/lib/scrapers/instagram";
 
 export async function GET(request: Request) {
   const { session, error } = await requireApiUser();
@@ -13,15 +14,19 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Username is required" }, { status: 400 });
   }
 
-  // Mock data for demonstration
-  const mockReels = Array.from({ length: 10 }).map((_, i) => ({
-    id: `reel_${i}`,
-    thumbnail: `https://picsum.photos/seed/${username}_${i}/400/711`,
-    url: `https://www.instagram.com/reels/mock_${i}/`,
-    caption: `Amazing content by @${username} #${i} #growth`,
-  }));
-
-  return NextResponse.json({ reels: mockReels });
+  try {
+    // Try to scrape Instagram reels
+    const reels = await getInstagramReelsByUsername(username);
+    return NextResponse.json({ reels });
+  } catch (error: any) {
+    // If scraping fails, fallback to mock data
+    console.error('Instagram scraper failed, using mock data:', error.message);
+    const mockReels = generateMockInstagramReels(username);
+    return NextResponse.json({ 
+      reels: mockReels,
+      warning: "Using mock data - scraper failed. This may be due to rate limiting or anti-bot measures."
+    });
+  }
 }
 
 export async function POST(request: Request) {

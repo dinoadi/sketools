@@ -438,6 +438,100 @@ Setelah custom domain aktif, update redirect URIs:
 
 ---
 
+## 🕷️ Catatan tentang Scraper
+
+### TikTok dan Instagram Scraper
+
+Project ini sudah dilengkapi dengan scraper untuk TikTok dan Instagram:
+
+#### TikTok Scraper
+- **File**: [`src/lib/scrapers/tiktok.ts`](src/lib/scrapers/tiktok.ts)
+- **Fungsi**: `getTikTokVideosByUsername(username)` - Scrape video TikTok berdasarkan username
+- **Fallback**: Jika scraper gagal, otomatis menggunakan mock data
+- **API Route**: [`src/app/api/tiktok/view/route.ts`](src/app/api/tiktok/view/route.ts)
+
+#### Instagram Scraper
+- **File**: [`src/lib/scrapers/instagram.ts`](src/lib/scrapers/instagram.ts)
+- **Fungsi**: `getInstagramReelsByUsername(username)` - Scrape reels Instagram berdasarkan username
+- **Fallback**: Jika scraper gagal, otomatis menggunakan mock data
+- **API Route**: [`src/app/api/downloader/instagram/route.ts`](src/app/api/downloader/instagram/route.ts)
+
+#### Cara Kerja Scraper
+
+1. **Coba Scrape Real**: Scraper mencoba mengambil data real dari TikTok/Instagram
+2. **Fallback ke Mock**: Jika scraper gagal (rate limiting, anti-bot, dll), otomatis fallback ke mock data
+3. **Warning Message**: User akan diberitahu jika menggunakan mock data
+
+#### Limitasi Scraper
+
+⚠️ **PENTING**: Scraper memiliki beberapa limitasi:
+
+1. **Anti-Bot Measures**: TikTok dan Instagram memiliki anti-bot measures yang kuat
+2. **Rate Limiting**: Platform mungkin membatasi jumlah requests
+3. **Data Structure**: Struktur data bisa berubah sewaktu-waktu
+4. **Legalitas**: Scraping mungkin melanggar Terms of Service
+
+#### Rekomendasi untuk Production
+
+Untuk production, pertimbangkan:
+
+1. **API Resmi**: Gunakan API resmi TikTok/Instagram (berbayar)
+2. **Advanced Scraper**: Gunakan scraper yang lebih advanced (Puppeteer, Playwright)
+3. **Rate Limiting**: Implementasi cache untuk mengurangi requests
+4. **Monitoring**: Monitor scraper performance dan error rate
+
+#### Dependencies
+
+Scraper menggunakan:
+- `axios` - Untuk HTTP requests
+- `cheerio` - Untuk HTML parsing
+
+### TikTok dan Instagram Scraper
+
+Project ini sudah dilengkapi dengan scraper untuk TikTok dan Instagram:
+
+#### TikTok Scraper
+- **File**: [`src/lib/scrapers/tiktok.ts`](src/lib/scrapers/tiktok.ts)
+- **Fungsi**: `getTikTokVideosByUsername(username)` - Scrape video TikTok berdasarkan username
+- **Fallback**: Jika scraper gagal, otomatis menggunakan mock data
+- **API Route**: [`src/app/api/tiktok/view/route.ts`](src/app/api/tiktok/view/route.ts)
+
+#### Instagram Scraper
+- **File**: [`src/lib/scrapers/instagram.ts`](src/lib/scrapers/instagram.ts)
+- **Fungsi**: `getInstagramReelsByUsername(username)` - Scrape reels Instagram berdasarkan username
+- **Fallback**: Jika scraper gagal, otomatis menggunakan mock data
+- **API Route**: [`src/app/api/downloader/instagram/route.ts`](src/app/api/downloader/instagram/route.ts)
+
+#### Cara Kerja Scraper
+
+1. **Coba Scrape Real**: Scraper mencoba mengambil data real dari TikTok/Instagram
+2. **Fallback ke Mock**: Jika scraper gagal (rate limiting, anti-bot, dll), otomatis fallback ke mock data
+3. **Warning Message**: User akan diberi tahu jika menggunakan mock data
+
+#### Limitasi Scraper
+
+⚠️ **PENTING**: Scraper memiliki beberapa limitasi:
+
+1. **Anti-Bot Measures**: TikTok dan Instagram memiliki anti-bot measures yang kuat
+2. **Rate Limiting**: Platform mungkin membatasi jumlah requests
+3. **Data Structure**: Struktur data bisa berubah sewaktu-waktu
+4. **Legalitas**: Scraping mungkin melanggar Terms of Service
+
+#### Rekomendasi untuk Production
+
+Untuk production, pertimbangkan:
+
+1. **API Resmi**: Gunakan API resmi TikTok/Instagram (berbayar)
+2. **Advanced Scraper**: Gunakan scraper yang lebih advanced (Puppeteer, Playwright)
+3. **Rate Limiting**: Implementasi cache untuk mengurangi requests
+4. **Monitoring**: Monitor scraper performance dan error rate
+
+#### Dependencies
+
+Scraper menggunakan:
+- `axios` - Untuk HTTP requests
+- `cheerio` - Untuk HTML parsing
+
 ## 🔍 Troubleshooting
 
 ### Masalah 1: Build Gagal
