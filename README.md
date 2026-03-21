@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SkeTools Growth OS
 
-## Getting Started
+Dashboard otomasi konten berbasis [Next.js 16](https://nextjs.org) dengan desain interaktif (dark/light mode), copy marketing, dan backend yang sudah diarahkan ke Supabase.
 
-First, run the development server:
+## Local Development
+
+1. Install dependency:
+
+```bash
+npm install
+```
+
+2. Jalankan development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Buka `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Buat file `.env.local` dan isi minimal:
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+```
 
-To learn more about Next.js, take a look at the following resources:
+Mode fallback lokal (`admin/admin`) tetap tersedia untuk pengujian cepat tanpa koneksi Supabase.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Reels Downloader Tanpa VPS
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Bisa, tanpa VPS tetap bisa jalan.
 
-## Deploy on Vercel
+Strategi yang disarankan:
+- Jalankan job downloader langsung di server app (Node runtime) untuk skala awal.
+- Simpan output ke local storage server atau object storage (mis. Supabase Storage).
+- Saat trafik meningkat, baru pisahkan ke worker service/queue terpisah.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy ke Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Langkah cepat:
+1. Push project ke GitHub.
+2. Import repository ke Vercel.
+3. Set Environment Variables yang sama seperti `.env.local`.
+4. Deploy.
+
+Opsional via CLI:
+
+```bash
+npm i -g vercel
+vercel
+vercel --prod
+```
+
+Untuk project ini, Vercel sudah cukup untuk hosting dashboard + API route MVP tanpa VPS.
