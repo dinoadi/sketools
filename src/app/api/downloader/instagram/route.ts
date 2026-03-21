@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   // Create jobs in the background
   if (type === "single") {
     await createJob(session.uid, {
-      tool: "downloader",
+      tool: "instagram-downloader",
       status: "queued",
       payload: { url, type: "instagram_single" },
       progress: 0,
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   } else {
     for (const reel of reels) {
       await createJob(session.uid, {
-        tool: "downloader",
+        tool: "instagram-downloader",
         status: "queued",
         payload: { url: reel.url, type: "instagram_mass", reelId: reel.id },
         progress: 0,

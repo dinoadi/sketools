@@ -7,22 +7,22 @@ export async function POST(request: Request) {
   if (error || !session) return error!;
 
   const body = await request.json();
-  const { platform, videoUrl, title, description, scheduleTime } = body;
+  const { provider, videoUrl, title, description, scheduleTime, connectedAccountId } = body;
 
-  if (!platform || !videoUrl || !title || !scheduleTime) {
+  if (!provider || !videoUrl || !title || !scheduleTime) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
   const schedule = await createSchedule(session.uid, {
-    platform,
-    videoUrl,
+    provider,
+    connectedAccountId: connectedAccountId || "",
+    sourceType: "url",
+    sourceValue: videoUrl,
     title,
     description,
-    scheduleTime,
-    status: "pending",
-    metadata: {
-      originalUrl: videoUrl,
-    },
+    scheduledAtUtc: scheduleTime,
+    timezone: "Asia/Jakarta",
+    status: "draft",
   });
 
   await writeAuditLog({
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     targetType: "schedule",
     targetId: schedule.id,
     metadata: {
-      platform,
+      provider,
       scheduleTime,
     },
   });
