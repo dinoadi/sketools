@@ -11,6 +11,8 @@ interface TikTokVideo {
   stats: {
     views: string;
     likes: string;
+    comments: string;
+    shares: string;
   };
 }
 
@@ -103,6 +105,8 @@ export default function TikTokViewerPage() {
                   <div className="mt-2 flex items-center justify-between text-[10px]" style={{ color: "var(--muted)" }}>
                     <span>👁️ {video.stats.views}</span>
                     <span>❤️ {video.stats.likes}</span>
+                    <span>💬 {video.stats.comments}</span>
+                    <span>🔗 {video.stats.shares}</span>
                   </div>
                 </div>
               </a>
