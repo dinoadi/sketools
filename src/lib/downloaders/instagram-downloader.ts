@@ -3,6 +3,7 @@ import axios from 'axios';
 // Pitucode API configuration
 const PITUCODE_API_KEY = process.env.PITUCODE_API_KEY || '7C0dEc80d39';
 const PITUCODE_API_URL = 'https://api.pitucode.com/instagram-downloader';
+const PITUCODE_STALKER_URL = 'https://api.pitucode.com/stalker/igstalk';
 
 export interface InstagramReelDownload {
   id: string;
@@ -11,6 +12,7 @@ export interface InstagramReelDownload {
   downloadUrl: string;
   caption: string;
   username: string;
+  type: 'reel' | 'video' | 'image';
   stats?: {
     views: string;
     likes: string;
@@ -57,6 +59,7 @@ export async function downloadInstagramReel(url: string): Promise<InstagramReelD
       downloadUrl: videoData.url || videoData.download_url || videoData.video_url || url,
       caption: videoData.caption || videoData.description || '',
       username: videoData.username || videoData.author || extractUsername(url),
+      type: 'reel',
       stats: {
         views: formatNumber(videoData.views || videoData.view_count || 0),
         likes: formatNumber(videoData.likes || videoData.like_count || 0),
@@ -69,6 +72,121 @@ export async function downloadInstagramReel(url: string): Promise<InstagramReelD
       throw new Error(`API Error: ${error.response.data.message}`);
     }
     throw new Error(`Failed to download Instagram reel: ${error.message}`);
+  }
+}
+
+/**
+ * Get Instagram posts by username using Pitucode Stalker API
+ * This fetches all posts (reels, videos, images) from a user's profile
+ */
+export async function getInstagramPostsByUsername(username: string): Promise<InstagramReelDownload[]> {
+  try {
+    const cleanUsername = username.replace('@', '').trim();
+    
+    // Call Pitucode Stalker API
+    const response = await axios.get(PITUCODE_STALKER_URL, {
+      params: {
+        apikey: PITUCODE_API_KEY,
+        username: cleanUsername,
+      },
+      timeout: 30000,
+    });
+
+    const data = response.data;
+
+    // Parse API response
+    if (!data || data.error) {
+      throw new Error(data?.message || 'Failed to fetch Instagram posts');
+    }
+
+    const posts = data.data || data.posts || data.reels || [];
+    
+    // If API returns posts, format them
+    if (Array.isArray(posts) && posts.length > 0) {
+      return posts.map((post: any, index: number) => {
+        // Determine post type based on available data
+        const type: 'reel' | 'video' | 'image' = post.type || 
+          (post.video_url || post.url?.includes('.mp4') ? 'video' : 'image');
+        
+        return {
+          id: post.id || `${cleanUsername}_${index}`,
+          thumbnail: post.thumbnail || post.cover || post.display_url || '',
+          videoUrl: post.url || post.video_url || post.display_url || '',
+          downloadUrl: post.url || post.download_url || post.video_url || post.display_url || '',
+          caption: post.caption || post.description || '',
+          username: post.username || post.author || cleanUsername,
+          type,
+          stats: {
+            views: formatNumber(post.views || post.view_count || 0),
+            likes: formatNumber(post.likes || post.like_count || 0),
+            comments: formatNumber(post.comments || post.comment_count || 0),
+          },
+        };
+      });
+    }
+
+    // Fallback: Generate mock data for demo purposes
+    return generateMockPosts(cleanUsername);
+  } catch (error: any) {
+    console.error('Error getting Instagram posts by username:', error.message);
+    return generateMockPosts(username.replace('@', ''));
+  }
+}
+
+/**
+ * Get Instagram Reels by username (for mass download)
+ * Note: This is a placeholder implementation
+ * The Pitucode API may not support username-based fetching
+ */
+export async function getInstagramReelsByUsername(username: string): Promise<InstagramReelDownload[]> {
+  try {
+    const cleanUsername = username.replace('@', '').trim();
+    
+    // Try to fetch from profile URL
+    const profileUrl = `https://www.instagram.com/${cleanUsername}/`;
+    
+    const response = await axios.get(PITUCODE_API_URL, {
+      params: {
+        url: profileUrl,
+      },
+      headers: {
+        'x-api-key': PITUCODE_API_KEY,
+      },
+      timeout: 30000,
+    });
+
+    const data = response.data;
+
+    // Parse API response
+    if (!data || data.error) {
+      throw new Error(data?.message || 'Failed to fetch Instagram reels');
+    }
+
+    const reels = data.data || data.reels || [];
+    
+    // If API returns reels, format them
+    if (Array.isArray(reels) && reels.length > 0) {
+      return reels.map((reel: any, index: number) => ({
+        id: reel.id || `${cleanUsername}_${index}`,
+        thumbnail: reel.thumbnail || reel.cover || '',
+        videoUrl: reel.url || reel.video_url || '',
+        downloadUrl: reel.url || reel.download_url || reel.video_url || '',
+        caption: reel.caption || reel.description || '',
+        username: reel.username || reel.author || cleanUsername,
+        type: 'reel',
+        stats: {
+          views: formatNumber(reel.views || reel.view_count || 0),
+          likes: formatNumber(reel.likes || reel.like_count || 0),
+          comments: formatNumber(reel.comments || reel.comment_count || 0),
+        },
+      }));
+    }
+
+    // Fallback: Generate mock data for demo purposes
+    return generateMockReels(cleanUsername);
+  } catch (error: any) {
+    console.error('Error getting Instagram reels by username:', error.message);
+    return generateMockReels(username.replace('@', ''));
   }
 }
 
@@ -124,62 +242,6 @@ export async function downloadVideoToBuffer(url: string): Promise<Buffer> {
 }
 
 /**
- * Get Instagram Reels by username (for mass download)
- * Note: This is a placeholder implementation
- * The Pitucode API may not support username-based fetching
- */
-export async function getInstagramReelsByUsername(username: string): Promise<InstagramReelDownload[]> {
-  try {
-    const cleanUsername = username.replace('@', '').trim();
-    
-    // Try to fetch from profile URL
-    const profileUrl = `https://www.instagram.com/${cleanUsername}/`;
-    
-    const response = await axios.get(PITUCODE_API_URL, {
-      params: {
-        url: profileUrl,
-      },
-      headers: {
-        'x-api-key': PITUCODE_API_KEY,
-      },
-      timeout: 30000,
-    });
-
-    const data = response.data;
-
-    // Parse API response
-    if (!data || data.error) {
-      throw new Error(data?.message || 'Failed to fetch Instagram reels');
-    }
-
-    const reels = data.data || data.reels || [];
-    
-    // If API returns reels, format them
-    if (Array.isArray(reels) && reels.length > 0) {
-      return reels.map((reel: any, index: number) => ({
-        id: reel.id || `${cleanUsername}_${index}`,
-        thumbnail: reel.thumbnail || reel.cover || '',
-        videoUrl: reel.url || reel.video_url || '',
-        downloadUrl: reel.url || reel.download_url || reel.video_url || '',
-        caption: reel.caption || reel.description || '',
-        username: reel.username || reel.author || cleanUsername,
-        stats: {
-          views: formatNumber(reel.views || reel.view_count || 0),
-          likes: formatNumber(reel.likes || reel.like_count || 0),
-          comments: formatNumber(reel.comments || reel.comment_count || 0),
-        },
-      }));
-    }
-
-    // Fallback: Generate mock data for demo purposes
-    return generateMockReels(cleanUsername);
-  } catch (error: any) {
-    console.error('Error getting Instagram reels by username:', error.message);
-    return generateMockReels(username.replace('@', ''));
-  }
-}
-
-/**
  * Generate mock reels for demo purposes
  */
 function generateMockReels(username: string): InstagramReelDownload[] {
@@ -204,6 +266,53 @@ function generateMockReels(username: string): InstagramReelDownload[] {
       downloadUrl: `https://www.instagram.com/reel/${username}/${i}`,
       caption: captions[i % captions.length],
       username,
+      type: 'reel',
+      stats: {
+        views: formatNumber(randomViews),
+        likes: formatNumber(randomLikes),
+        comments: formatNumber(randomComments),
+      },
+    };
+  });
+}
+
+/**
+ * Generate mock posts for demo purposes
+ */
+function generateMockPosts(username: string): InstagramReelDownload[] {
+  return Array.from({ length: 12 }).map((_, i) => {
+    const seed = `${username}_${i}`;
+    const randomViews = Math.floor(Math.random() * 100000) + 5000;
+    const randomLikes = Math.floor(randomViews * (Math.random() * 0.15 + 0.05));
+    const randomComments = Math.floor(randomLikes * (Math.random() * 0.3 + 0.1));
+    
+    // Mix of reels, videos, and images
+    const types: ('reel' | 'video' | 'image')[] = ['reel', 'reel', 'reel', 'reel', 'reel', 'reel', 'video', 'video', 'image', 'image', 'image', 'image'];
+    const type = types[i % types.length];
+
+    const captions = [
+      `Amazing post by @${username}! 🔥 #viral`,
+      `Check this out! @${username} #trending #explore`,
+      `This is fire! @${username} #instagram #viral`,
+      `You need to see this! @${username} #trending`,
+      `Best content ever! @${username} #viral #explore`,
+      `Love this! @${username} #instagood`,
+      `Must watch! @${username} #reels`,
+      `Incredible! @${username} #explorepage`,
+      `So good! @${username} #instadaily`,
+      `Wow! @${username} #viral`,
+      `Amazing! @${username} #trending`,
+      `Perfect! @${username} #instalove`,
+    ];
+
+    return {
+      id: `instagram_${username}_${i}`,
+      thumbnail: `https://picsum.photos/seed/${seed}/400/711`,
+      videoUrl: `https://www.instagram.com/p/${username}/${i}`,
+      downloadUrl: `https://www.instagram.com/p/${username}/${i}`,
+      caption: captions[i % captions.length],
+      username,
+      type,
       stats: {
         views: formatNumber(randomViews),
         likes: formatNumber(randomLikes),
