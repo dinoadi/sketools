@@ -100,76 +100,82 @@ export default function DownloaderPage() {
   return (
     <AppShell
       title={
-        <div className="flex items-center gap-2">
-          <InstagramLogo className="h-6 w-6" />
-          <span>Instagram Reels Downloader</span>
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 shadow-lg shadow-pink-500/30">
+            <InstagramLogo className="h-6 w-6 text-white" />
+          </div>
+          <span className="text-white">Instagram Reels Downloader</span>
         </div>
       }
       description="Unduh reels satuan atau massal dari username target dengan preview seleksi."
     >
       <div className="grid gap-6 md:grid-cols-2">
         {/* Single Download */}
-        <section className="glass flex flex-col gap-4 rounded-2xl p-6">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/10 text-purple-500">
-              <InstagramLogo className="h-5 w-5" />
-            </span>
-            <h2 className="text-lg font-semibold">Single URL Download</h2>
+        <section className="relative overflow-hidden rounded-2xl border-2 border-pink-500/30 bg-gradient-to-br from-pink-500/10 to-rose-500/10 p-6 backdrop-blur-sm shadow-2xl">
+          <div className="absolute -right-10 -top-10 h-20 w-20 rounded-full bg-gradient-to-br from-pink-500/20 to-rose-500/10 blur-2xl"></div>
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 shadow-lg shadow-pink-500/30">
+                <InstagramLogo className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-lg font-bold text-white">Single URL Download</h2>
+            </div>
+            <form onSubmit={handleSingleDownload} className="flex flex-col gap-3">
+              <input
+                type="url"
+                placeholder="https://www.instagram.com/reels/..."
+                className="w-full rounded-xl border-2 border-white/20 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/50 outline-none transition focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 backdrop-blur-sm"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                required
+              />
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="interactive-btn flex items-center justify-center rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-pink-500/30 transition-all hover:scale-105 disabled:opacity-50"
+              >
+                {isLoading ? "Memproses..." : "Download Sekarang"}
+              </button>
+            </form>
           </div>
-          <form onSubmit={handleSingleDownload} className="flex flex-col gap-3">
-            <input
-              type="url"
-              placeholder="https://www.instagram.com/reels/..."
-              className="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-purple-500/20"
-              style={{ borderColor: "var(--border)", background: "var(--surface-strong)", color: "var(--foreground)" }}
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              required
-            />
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="interactive-btn flex items-center justify-center rounded-xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-            >
-              {isLoading ? "Memproses..." : "Download Sekarang"}
-            </button>
-          </form>
         </section>
 
         {/* Mass Download Search */}
-        <section className="glass flex flex-col gap-4 rounded-2xl p-6">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-pink-500/10 to-orange-500/10 text-pink-500">
-              <InstagramLogo className="h-5 w-5" />
-            </span>
-            <h2 className="text-lg font-semibold">Mass Download by Username</h2>
-          </div>
-          <form onSubmit={handleFetchUsername} className="flex flex-col gap-3">
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">@</span>
-              <input
-                type="text"
-                placeholder="username_instagram"
-                className="w-full rounded-xl border py-2.5 pl-8 pr-4 text-sm outline-none transition focus:ring-2 focus:ring-pink-500/20"
-                style={{ borderColor: "var(--border)", background: "var(--surface-strong)", color: "var(--foreground)" }}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
+        <section className="relative overflow-hidden rounded-2xl border-2 border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 backdrop-blur-sm shadow-2xl">
+          <div className="absolute -right-10 -top-10 h-20 w-20 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/10 blur-2xl"></div>
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg shadow-purple-500/30">
+                <InstagramLogo className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-lg font-bold text-white">Mass Download by Username</h2>
             </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="interactive-btn flex items-center justify-center rounded-xl bg-gradient-to-r from-pink-500 via-purple-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-            >
-              {isLoading ? "Cari Reels..." : "Tampilkan Preview"}
-            </button>
-          </form>
+            <form onSubmit={handleFetchUsername} className="flex flex-col gap-3">
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50">@</span>
+                <input
+                  type="text"
+                  placeholder="username_instagram"
+                  className="w-full rounded-xl border-2 border-white/20 bg-white/5 py-2.5 pl-8 pr-4 text-sm text-white placeholder-white/50 outline-none transition focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 backdrop-blur-sm"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="interactive-btn flex items-center justify-center rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-500/30 transition-all hover:scale-105 disabled:opacity-50"
+              >
+                {isLoading ? "Cari Reels..." : "Tampilkan Preview"}
+              </button>
+            </form>
+          </div>
         </section>
       </div>
 
       {error && (
-        <div className="mt-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-600">
+        <div className="mt-6 rounded-xl border-2 border-rose-500/30 bg-gradient-to-br from-rose-500/10 to-red-500/10 p-4 text-sm text-rose-300 backdrop-blur-sm">
           {error}
         </div>
       )}
@@ -178,21 +184,20 @@ export default function DownloaderPage() {
       {previews.length > 0 && (
         <section className="mt-8">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">
+            <h3 className="font-bold text-white">
               Hasil Discovery ({previews.length} reels ditemukan)
             </h3>
             <div className="flex gap-2">
               <button
                 onClick={selectAll}
-                className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-surface-strong"
-                style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
+                className="rounded-xl border-2 border-white/20 bg-white/5 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition hover:bg-white/10 hover:border-white/30"
               >
                 {selectedIds.size === previews.length ? "Batalkan Semua" : "Pilih Semua"}
               </button>
               <button
                 onClick={handleMassDownload}
                 disabled={selectedIds.size === 0 || isLoading}
-                className="rounded-lg bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                className="rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-pink-500/30 transition-all hover:scale-105 disabled:opacity-50"
               >
                 Download {selectedIds.size} Selected
               </button>
@@ -204,20 +209,22 @@ export default function DownloaderPage() {
               <div
                 key={reel.id}
                 onClick={() => toggleSelect(reel.id)}
-                className={`group relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all ${
-                  selectedIds.has(reel.id) ? "border-pink-500 ring-2 ring-pink-500/20" : "border-transparent"
+                className={`group relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all hover:scale-105 ${
+                  selectedIds.has(reel.id) 
+                    ? "border-pink-500 ring-2 ring-pink-500/20 shadow-lg shadow-pink-500/30" 
+                    : "border-white/20 hover:border-pink-500/50"
                 }`}
               >
                 <img
                   src={reel.thumbnail}
                   alt={reel.caption}
-                  className="aspect-[9/16] w-full object-cover transition group-hover:scale-105"
+                  className="aspect-[9/16] w-full object-cover transition group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent p-3 opacity-0 transition group-hover:opacity-100">
-                  <p className="line-clamp-2 text-[10px] text-white">{reel.caption}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-3 opacity-0 transition group-hover:opacity-100">
+                  <p className="line-clamp-2 text-[10px] text-white font-medium">{reel.caption}</p>
                 </div>
                 {selectedIds.has(reel.id) && (
-                  <div className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg">
+                  <div className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-500/50">
                     ✓
                   </div>
                 )}

@@ -49,120 +49,130 @@ export default function SchedulerCenterPage() {
   return (
     <AppShell
       title={
-        <div className="flex items-center gap-2">
-          <YouTubeLogo className="h-6 w-6" />
-          <TikTokLogo className="h-6 w-6" />
-          <span>Scheduler Center</span>
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-pink-600 shadow-lg shadow-red-500/30">
+            <YouTubeLogo className="h-6 w-6 text-white" />
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-pink-600 shadow-lg shadow-cyan-500/30">
+            <TikTokLogo className="h-6 w-6 text-white" />
+          </div>
+          <span className="text-white">Scheduler Center</span>
         </div>
       }
       description="Jadwalkan konten YouTube dan TikTok Anda secara otomatis dari URL video atau cloud storage."
     >
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Form Section */}
-        <section className="glass col-span-2 rounded-2xl p-6">
-          <h2 className="mb-6 text-xl font-semibold">Buat Jadwal Upload Baru</h2>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <div className="grid gap-4 sm:grid-cols-2">
+        <section className="relative overflow-hidden col-span-2 rounded-2xl border-2 border-white/10 bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 backdrop-blur-sm shadow-2xl">
+          <div className="absolute -right-10 -top-10 h-20 w-20 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/10 blur-2xl"></div>
+          <div className="relative">
+            <h2 className="mb-6 text-xl font-bold text-white">Buat Jadwal Upload Baru</h2>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-sm font-semibold text-white">Pilih Platform</span>
+                  <select
+                    value={platform}
+                    onChange={(e) => setPlatform(e.target.value as any)}
+                    className="rounded-xl border-2 border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 backdrop-blur-sm"
+                  >
+                    <option value="youtube" className="bg-slate-900">YouTube</option>
+                    <option value="tiktok" className="bg-slate-900">TikTok</option>
+                  </select>
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-sm font-semibold text-white">Waktu Upload</span>
+                  <input
+                    type="datetime-local"
+                    value={scheduleTime}
+                    onChange={(e) => setScheduleTime(e.target.value)}
+                    className="rounded-xl border-2 border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 backdrop-blur-sm"
+                    required
+                  />
+                </label>
+              </div>
+
               <label className="flex flex-col gap-1.5">
-                <span className="text-sm font-medium">Pilih Platform</span>
-                <select
-                  value={platform}
-                  onChange={(e) => setPlatform(e.target.value as any)}
-                  className="rounded-xl border px-3 py-2.5 text-sm outline-none transition"
-                  style={{ borderColor: "var(--border)", background: "var(--surface-strong)", color: "var(--foreground)" }}
-                >
-                  <option value="youtube">YouTube</option>
-                  <option value="tiktok">TikTok</option>
-                </select>
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-sm font-medium">Waktu Upload</span>
+                <span className="text-sm font-semibold text-white">Video URL (Direct link, Drive, or Cloud)</span>
                 <input
-                  type="datetime-local"
-                  value={scheduleTime}
-                  onChange={(e) => setScheduleTime(e.target.value)}
-                  className="rounded-xl border px-3 py-2.5 text-sm outline-none transition"
-                  style={{ borderColor: "var(--border)", background: "var(--surface-strong)", color: "var(--foreground)" }}
+                  type="url"
+                  placeholder="https://example.com/video.mp4"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  className="rounded-xl border-2 border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/50 outline-none transition focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 backdrop-blur-sm"
                   required
                 />
               </label>
-            </div>
 
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium">Video URL (Direct link, Drive, or Cloud)</span>
-              <input
-                type="url"
-                placeholder="https://example.com/video.mp4"
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                className="rounded-xl border px-3 py-2.5 text-sm outline-none transition"
-                style={{ borderColor: "var(--border)", background: "var(--surface-strong)", color: "var(--foreground)" }}
-                required
-              />
-            </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-semibold text-white">Judul Konten</span>
+                <input
+                  type="text"
+                  placeholder="Judul menarik untuk konten Anda"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="rounded-xl border-2 border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/50 outline-none transition focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 backdrop-blur-sm"
+                  required
+                />
+              </label>
 
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium">Judul Konten</span>
-              <input
-                type="text"
-                placeholder="Judul menarik untuk konten Anda"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="rounded-xl border px-3 py-2.5 text-sm outline-none transition"
-                style={{ borderColor: "var(--border)", background: "var(--surface-strong)", color: "var(--foreground)" }}
-                required
-              />
-            </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-semibold text-white">Deskripsi / Captions</span>
+                <textarea
+                  placeholder="Tambahkan deskripsi dan hashtags..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={4}
+                  className="rounded-xl border-2 border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/50 outline-none transition focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 backdrop-blur-sm"
+                />
+              </label>
 
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium">Deskripsi / Captions</span>
-              <textarea
-                placeholder="Tambahkan deskripsi dan hashtags..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-                className="rounded-xl border px-3 py-2.5 text-sm outline-none transition"
-                style={{ borderColor: "var(--border)", background: "var(--surface-strong)", color: "var(--foreground)" }}
-              />
-            </label>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`interactive-btn mt-2 flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 disabled:opacity-50 ${
+                  platform === "youtube" 
+                    ? "bg-gradient-to-r from-red-500 to-red-600 shadow-red-500/30" 
+                    : "bg-gradient-to-r from-cyan-500 via-pink-500 to-pink-600 shadow-cyan-500/30"
+                }`}
+              >
+                {isLoading ? "Memproses..." : "Jadwalkan Sekarang"}
+              </button>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`interactive-btn mt-2 flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white disabled:opacity-50 ${
-                platform === "youtube" 
-                  ? "bg-gradient-to-r from-red-500 to-red-600" 
-                  : "bg-gradient-to-r from-cyan-500 via-pink-500 to-pink-600"
-              }`}
-            >
-              {isLoading ? "Memproses..." : "Jadwalkan Sekarang"}
-            </button>
-
-            {message && (
-              <p className={`rounded-xl border p-4 text-sm ${
-                message.type === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-rose-200 bg-rose-50 text-rose-700"
-              }`}>
-                {message.text}
-              </p>
-            )}
-          </form>
+              {message && (
+                <p className={`rounded-xl border-2 p-4 text-sm backdrop-blur-sm ${
+                  message.type === "success" 
+                    ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-green-500/10 text-emerald-300" 
+                    : "border-rose-500/30 bg-gradient-to-br from-rose-500/10 to-red-500/10 text-rose-300"
+                }`}>
+                  {message.text}
+                </p>
+              )}
+            </form>
+          </div>
         </section>
 
         {/* Info Section */}
         <aside className="flex flex-col gap-6">
-          <div className="glass rounded-2xl p-6">
-            <h3 className="font-semibold">💡 Tips Scheduling</h3>
-            <ul className="mt-4 space-y-3 text-sm text-muted">
-              <li>• Gunakan direct link video (MP4) agar proses download cepat.</li>
-              <li>• Pastikan akun sudah terhubung di menu <b>Connected Accounts</b>.</li>
-              <li>• Upload massal akan diproses satu per satu sesuai antrean.</li>
-            </ul>
+          <div className="relative overflow-hidden rounded-2xl border-2 border-white/10 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 p-6 backdrop-blur-sm shadow-2xl">
+            <div className="absolute -right-10 -top-10 h-20 w-20 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/10 blur-2xl"></div>
+            <div className="relative">
+              <h3 className="font-bold text-white">💡 Tips Scheduling</h3>
+              <ul className="mt-4 space-y-3 text-sm text-white/70">
+                <li>• Gunakan direct link video (MP4) agar proses download cepat.</li>
+                <li>• Pastikan akun sudah terhubung di menu <b className="text-white">Connected Accounts</b>.</li>
+                <li>• Upload massal akan diproses satu per satu sesuai antrean.</li>
+              </ul>
+            </div>
           </div>
-          <div className="glass rounded-2xl p-6">
-            <h3 className="font-semibold">📈 Status Antrean</h3>
-            <p className="mt-2 text-sm text-muted">
-              Semua jadwal upload Anda bisa dipantau di halaman Dashboard untuk melihat status real-time.
-            </p>
+          <div className="relative overflow-hidden rounded-2xl border-2 border-white/10 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-6 backdrop-blur-sm shadow-2xl">
+            <div className="absolute -right-10 -top-10 h-20 w-20 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/10 blur-2xl"></div>
+            <div className="relative">
+              <h3 className="font-bold text-white">📈 Status Antrean</h3>
+              <p className="mt-2 text-sm text-white/70">
+                Semua jadwal upload Anda bisa dipantau di halaman Dashboard untuk melihat status real-time.
+              </p>
+            </div>
           </div>
         </aside>
       </div>
