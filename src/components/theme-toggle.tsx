@@ -1,45 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-type ThemeMode = "dark" | "light";
-
-const STORAGE_KEY = "sketools-theme";
+import { useTheme } from "@/components/theme-provider";
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<ThemeMode>(() => {
-    if (typeof window === "undefined") {
-      return "dark";
-    }
-
-    return (window.localStorage.getItem(STORAGE_KEY) as ThemeMode | null) === "light"
-      ? "light"
-      : "dark";
-  });
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme]);
-
-  function handleToggle() {
-    const nextTheme: ThemeMode = theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = nextTheme;
-    window.localStorage.setItem(STORAGE_KEY, nextTheme);
-    setTheme(nextTheme);
-  }
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <button
       type="button"
-      onClick={handleToggle}
-      className="interactive-btn inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold"
-      style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--foreground)" }}
+      onClick={toggleTheme}
+      className="inline-flex items-center gap-2 rounded-full border-2 border-purple-500/30 bg-white/10 dark:bg-black/20 px-4 py-2 text-xs font-semibold text-gray-900 dark:text-white backdrop-blur-sm transition-all duration-300 hover:border-purple-500/60 hover:bg-white/20 dark:hover:bg-black/30 hover:scale-105"
       aria-label="Toggle dark light mode"
       title="Toggle dark light mode"
     >
-      <span>{theme === "dark" ? "🌙 Dark" : "☀️ Light"}</span>
+      {theme === "dark" ? (
+        <>
+          <span className="text-lg">🌙</span>
+          <span>Dark</span>
+        </>
+      ) : (
+        <>
+          <span className="text-lg">☀️</span>
+          <span>Light</span>
+        </>
+      )}
     </button>
   );
 }
-
