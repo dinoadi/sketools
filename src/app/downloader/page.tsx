@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { InstagramLogo } from "@/components/logos/instagram-logo";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggleClient } from "@/components/theme-toggle-client";
+
+export const dynamic = 'force-dynamic';
 
 interface InstagramPost {
   id: string;
@@ -114,7 +116,7 @@ export default function DownloaderPage() {
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">SkeTools</span>
             </a>
-            <ThemeToggle />
+            <ThemeToggleClient />
           </div>
         </div>
       </nav>

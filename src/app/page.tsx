@@ -3,7 +3,7 @@ import { InstagramLogo } from "@/components/logos/instagram-logo";
 import { TikTokLogo } from "@/components/logos/tiktok-logo";
 import { YouTubeLogo } from "@/components/logos/youtube-logo";
 import { WhatsAppLogo } from "@/components/logos/whatsapp-logo";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggleClient } from "@/components/theme-toggle-client";
 
 export default function HomePage() {
   return (
@@ -19,7 +19,7 @@ export default function HomePage() {
               <span className="text-xl font-bold text-gray-900 dark:text-white">SkeTools</span>
             </div>
             <div className="flex items-center gap-4">
-              <ThemeToggle />
+              <ThemeToggleClient />
               <Link
                 href="/login"
                 className="rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-2.5 font-semibold text-white shadow-lg shadow-purple-500/30 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/50"

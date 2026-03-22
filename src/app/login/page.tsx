@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DevLoginForm } from "@/components/auth/dev-login-form";
 import { getServerSession } from "@/lib/auth/session";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggleClient } from "@/components/theme-toggle-client";
 
 export default async function LoginPage() {
   const session = await getServerSession();
@@ -23,7 +23,7 @@ export default async function LoginPage() {
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">SkeTools</span>
             </Link>
-            <ThemeToggle />
+            <ThemeToggleClient />
           </div>
         </div>
       </nav>

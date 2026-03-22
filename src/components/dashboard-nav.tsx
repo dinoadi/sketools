@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { SignOutButton } from "@/components/auth/sign-out-button";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggleClient } from "@/components/theme-toggle-client";
 import { InstagramLogo } from "@/components/logos/instagram-logo";
 import { YouTubeLogo } from "@/components/logos/youtube-logo";
 import { TikTokLogo } from "@/components/logos/tiktok-logo";
@@ -45,7 +45,7 @@ export function DashboardNav() {
               <div className="absolute inset-0 -z-0 bg-gradient-to-r from-pink-500/0 via-purple-500/0 to-cyan-500/0 transition-all group-hover:from-pink-500/20 group-hover:via-purple-500/20 group-hover:to-cyan-500/20"></div>
             </Link>
           ))}
-          <ThemeToggle />
+          <ThemeToggleClient />
           <SignOutButton />
         </nav>
       </div>
