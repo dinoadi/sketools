@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { DashboardNav } from "@/components/dashboard-nav";
 
 type AppShellProps = {
-  title: string;
+  title: ReactNode;
   description?: string;
   children: ReactNode;
 };

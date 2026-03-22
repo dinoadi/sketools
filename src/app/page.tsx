@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { InstagramLogo } from "@/components/logos/instagram-logo";
+import { YouTubeLogo } from "@/components/logos/youtube-logo";
+import { TikTokLogo } from "@/components/logos/tiktok-logo";
 
 export default function Home() {
   return (
@@ -116,28 +119,28 @@ export default function Home() {
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           <ToolCard 
-            icon="📸" 
+            logo={<InstagramLogo className="h-8 w-8" />}
             title="IG Downloader" 
             desc="Download Reels & Video IG secara massal via username atau URL."
-            color="bg-pink-500"
+            gradient="from-purple-500 via-pink-500 to-orange-500"
           />
           <ToolCard 
-            icon="📺" 
+            logo={<YouTubeLogo className="h-8 w-8" />}
             title="YT Scheduler" 
             desc="Jadwalkan upload video YouTube secara otomatis dari cloud storage."
-            color="bg-red-500"
+            gradient="from-red-500 to-red-600"
           />
           <ToolCard 
-            icon="🎵" 
+            logo={<TikTokLogo className="h-8 w-8" />}
             title="TT Scheduler" 
             desc="Upload video ke TikTok sesuai jadwal tanpa perlu standby di HP."
-            color="bg-slate-900"
+            gradient="from-black via-gray-900 to-black"
           />
           <ToolCard 
-            icon="👀" 
+            logo={<TikTokLogo className="h-8 w-8" />}
             title="TT Viewer" 
             desc="Pantau konten viral TikTok kompetitor tanpa perlu login."
-            color="bg-cyan-500"
+            gradient="from-cyan-400 via-cyan-500 to-cyan-600"
           />
         </div>
       </section>
@@ -174,11 +177,11 @@ export default function Home() {
   );
 }
 
-function ToolCard({ icon, title, desc, color }: { icon: string; title: string; desc: string; color: string }) {
+function ToolCard({ logo, title, desc, gradient }: { logo: React.ReactNode; title: string; desc: string; gradient: string }) {
   return (
     <article className="glass group relative overflow-hidden rounded-3xl p-8 transition-all hover:-translate-y-2">
-      <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl text-2xl shadow-lg ${color} text-white`}>
-        {icon}
+      <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg bg-gradient-to-br ${gradient} text-white`}>
+        {logo}
       </div>
       <h3 className="text-xl font-bold" style={{ color: "var(--foreground)" }}>{title}</h3>
       <p className="mt-3 text-sm leading-6" style={{ color: "var(--muted)" }}>{desc}</p>

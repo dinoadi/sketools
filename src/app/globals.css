@@ -19,6 +19,17 @@
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
+  
+  /* Platform Colors */
+  --youtube-red: #FF0000;
+  --youtube-red-dark: #CC0000;
+  --instagram-purple: #833AB4;
+  --instagram-pink: #E1306C;
+  --instagram-orange: #FD1D1D;
+  --instagram-yellow: #FCAF45;
+  --tiktok-black: #000000;
+  --tiktok-cyan: #25F4EE;
+  --tiktok-pink: #FE2C55;
 }
 
 @theme inline {

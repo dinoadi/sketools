@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { TikTokLogo } from "@/components/logos/tiktok-logo";
 
 interface TikTokVideo {
   id: string;
@@ -43,7 +44,12 @@ export default function TikTokViewerPage() {
 
   return (
     <AppShell
-      title="👀 TikTok Viewer (No Login)"
+      title={
+        <div className="flex items-center gap-2">
+          <TikTokLogo className="h-6 w-6" />
+          <span>TikTok Viewer (No Login)</span>
+        </div>
+      }
       description="Lihat video dari username TikTok tanpa harus login. Cukup masukkan username atau link profil."
     >
       <section className="glass mx-auto max-w-2xl rounded-2xl p-6">
@@ -53,7 +59,7 @@ export default function TikTokViewerPage() {
             <input
               type="text"
               placeholder="username_tiktok"
-              className="w-full rounded-xl border py-2.5 pl-8 pr-4 text-sm outline-none transition focus:ring-2 focus:ring-primary/20"
+              className="w-full rounded-xl border py-2.5 pl-8 pr-4 text-sm outline-none transition focus:ring-2 focus:ring-cyan-500/20"
               style={{ borderColor: "var(--border)", background: "var(--surface-strong)", color: "var(--foreground)" }}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -63,7 +69,7 @@ export default function TikTokViewerPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="interactive-btn rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            className="interactive-btn rounded-xl bg-gradient-to-r from-cyan-500 to-pink-500 px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             {isLoading ? "Mencari..." : "Lihat"}
           </button>

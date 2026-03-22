@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { InstagramLogo } from "@/components/logos/instagram-logo";
 
 interface ReelPreview {
   id: string;
@@ -98,15 +99,20 @@ export default function DownloaderPage() {
 
   return (
     <AppShell
-      title="⚡ Instagram Reels Downloader"
+      title={
+        <div className="flex items-center gap-2">
+          <InstagramLogo className="h-6 w-6" />
+          <span>Instagram Reels Downloader</span>
+        </div>
+      }
       description="Unduh reels satuan atau massal dari username target dengan preview seleksi."
     >
       <div className="grid gap-6 md:grid-cols-2">
         {/* Single Download */}
         <section className="glass flex flex-col gap-4 rounded-2xl p-6">
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-500/10 text-pink-500">
-              🔗
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/10 text-purple-500">
+              <InstagramLogo className="h-5 w-5" />
             </span>
             <h2 className="text-lg font-semibold">Single URL Download</h2>
           </div>
@@ -114,7 +120,7 @@ export default function DownloaderPage() {
             <input
               type="url"
               placeholder="https://www.instagram.com/reels/..."
-              className="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-pink-500/20"
+              className="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-purple-500/20"
               style={{ borderColor: "var(--border)", background: "var(--surface-strong)", color: "var(--foreground)" }}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -123,7 +129,7 @@ export default function DownloaderPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="interactive-btn flex items-center justify-center rounded-xl bg-pink-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+              className="interactive-btn flex items-center justify-center rounded-xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
             >
               {isLoading ? "Memproses..." : "Download Sekarang"}
             </button>
@@ -133,8 +139,8 @@ export default function DownloaderPage() {
         {/* Mass Download Search */}
         <section className="glass flex flex-col gap-4 rounded-2xl p-6">
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500">
-              👤
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-pink-500/10 to-orange-500/10 text-pink-500">
+              <InstagramLogo className="h-5 w-5" />
             </span>
             <h2 className="text-lg font-semibold">Mass Download by Username</h2>
           </div>
@@ -144,7 +150,7 @@ export default function DownloaderPage() {
               <input
                 type="text"
                 placeholder="username_instagram"
-                className="w-full rounded-xl border py-2.5 pl-8 pr-4 text-sm outline-none transition focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl border py-2.5 pl-8 pr-4 text-sm outline-none transition focus:ring-2 focus:ring-pink-500/20"
                 style={{ borderColor: "var(--border)", background: "var(--surface-strong)", color: "var(--foreground)" }}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -154,7 +160,7 @@ export default function DownloaderPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="interactive-btn flex items-center justify-center rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+              className="interactive-btn flex items-center justify-center rounded-xl bg-gradient-to-r from-pink-500 via-purple-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
             >
               {isLoading ? "Cari Reels..." : "Tampilkan Preview"}
             </button>
@@ -186,7 +192,7 @@ export default function DownloaderPage() {
               <button
                 onClick={handleMassDownload}
                 disabled={selectedIds.size === 0 || isLoading}
-                className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+                className="rounded-lg bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
               >
                 Download {selectedIds.size} Selected
               </button>
@@ -211,7 +217,7 @@ export default function DownloaderPage() {
                   <p className="line-clamp-2 text-[10px] text-white">{reel.caption}</p>
                 </div>
                 {selectedIds.has(reel.id) && (
-                  <div className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-pink-500 text-white shadow-lg">
+                  <div className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg">
                     ✓
                   </div>
                 )}

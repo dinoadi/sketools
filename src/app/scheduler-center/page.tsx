@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { YouTubeLogo } from "@/components/logos/youtube-logo";
+import { TikTokLogo } from "@/components/logos/tiktok-logo";
 
 export default function SchedulerCenterPage() {
   const [platform, setPlatform] = useState<"youtube" | "tiktok">("youtube");
@@ -46,7 +48,13 @@ export default function SchedulerCenterPage() {
 
   return (
     <AppShell
-      title="🗓️ Scheduler Center"
+      title={
+        <div className="flex items-center gap-2">
+          <YouTubeLogo className="h-6 w-6" />
+          <TikTokLogo className="h-6 w-6" />
+          <span>Scheduler Center</span>
+        </div>
+      }
       description="Jadwalkan konten YouTube dan TikTok Anda secara otomatis dari URL video atau cloud storage."
     >
       <div className="grid gap-8 lg:grid-cols-3">
@@ -63,8 +71,8 @@ export default function SchedulerCenterPage() {
                   className="rounded-xl border px-3 py-2.5 text-sm outline-none transition"
                   style={{ borderColor: "var(--border)", background: "var(--surface-strong)", color: "var(--foreground)" }}
                 >
-                  <option value="youtube">📺 YouTube</option>
-                  <option value="tiktok">🎵 TikTok</option>
+                  <option value="youtube">YouTube</option>
+                  <option value="tiktok">TikTok</option>
                 </select>
               </label>
               <label className="flex flex-col gap-1.5">
@@ -121,9 +129,13 @@ export default function SchedulerCenterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="interactive-btn mt-2 flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              className={`interactive-btn mt-2 flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white disabled:opacity-50 ${
+                platform === "youtube" 
+                  ? "bg-gradient-to-r from-red-500 to-red-600" 
+                  : "bg-gradient-to-r from-cyan-500 via-pink-500 to-pink-600"
+              }`}
             >
-              {isLoading ? "Memproses..." : "🗓️ Jadwalkan Sekarang"}
+              {isLoading ? "Memproses..." : "Jadwalkan Sekarang"}
             </button>
 
             {message && (
