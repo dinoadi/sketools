@@ -1,5 +1,8 @@
 import axios from 'axios';
-import * as cheerio from 'cheerio';
+
+// Pitucode API configuration
+const PITUCODE_API_KEY = process.env.PITUCODE_API_KEY || 'YOURAPIKEY';
+const PITUCODE_API_URL = 'https://api.pitucode.com/instagram-downloader';
 
 export interface InstagramReelDownload {
   id: string;
@@ -16,8 +19,7 @@ export interface InstagramReelDownload {
 }
 
 /**
- * Download Instagram Reel from URL
- * Based on parth-dl and reels-downloader approaches
+ * Download Instagram Reel from URL using Pitucode API
  */
 export async function downloadInstagramReel(url: string): Promise<InstagramReelDownload> {
   try {
@@ -27,39 +29,45 @@ export async function downloadInstagramReel(url: string): Promise<InstagramReelD
       throw new Error('Invalid Instagram Reel URL');
     }
 
-    // Scrape Instagram page for video data
-    const response = await axios.get(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Referer': 'https://www.instagram.com/',
+    // Call Pitucode API
+    const response = await axios.get(PITUCODE_API_URL, {
+      params: {
+        url: url,
       },
-      timeout: 15000,
+      headers: {
+        'x-api-key': PITUCODE_API_KEY,
+      },
+      timeout: 30000,
     });
 
-    const $ = cheerio.load(response.data);
-    
-    // Extract video data from shared data
-    const videoData = extractVideoDataFromPage($);
-    
-    if (!videoData) {
-      throw new Error('Could not extract video data from Instagram page');
+    const data = response.data;
+
+    // Parse API response
+    if (!data || data.error) {
+      throw new Error(data?.message || 'Failed to download Instagram reel');
     }
 
+    // Extract video data from API response
+    const videoData = data.data || data;
+    
     return {
       id: reelId,
-      thumbnail: videoData.thumbnail || '',
+      thumbnail: videoData.thumbnail || videoData.cover || '',
       videoUrl: url,
-      downloadUrl: videoData.videoUrl || url,
-      caption: videoData.caption || '',
-      username: videoData.username || extractUsername(url),
-      stats: videoData.stats,
+      downloadUrl: videoData.url || videoData.download_url || videoData.video_url || url,
+      caption: videoData.caption || videoData.description || '',
+      username: videoData.username || videoData.author || extractUsername(url),
+      stats: {
+        views: formatNumber(videoData.views || videoData.view_count || 0),
+        likes: formatNumber(videoData.likes || videoData.like_count || 0),
+        comments: formatNumber(videoData.comments || videoData.comment_count || 0),
+      },
     };
   } catch (error: any) {
     console.error('Error downloading Instagram reel:', error.message);
+    if (error.response?.data?.message) {
+      throw new Error(`API Error: ${error.response.data.message}`);
+    }
     throw new Error(`Failed to download Instagram reel: ${error.message}`);
   }
 }
@@ -91,63 +99,6 @@ function extractUsername(url: string): string {
 }
 
 /**
- * Extract video data from Instagram page HTML
- */
-function extractVideoDataFromPage($: cheerio.CheerioAPI): any {
-  // Look for video data in script tags
-  const scriptTags = $('script').toArray();
-  
-  for (const script of scriptTags) {
-    const scriptContent = $(script).html();
-    if (!scriptContent) continue;
-
-    // Look for JSON data containing video information
-    if (scriptContent.includes('video_url') || scriptContent.includes('videoUrl') || 
-        scriptContent.includes('edge_sidecar_to_videos')) {
-      try {
-        // Extract JSON from script
-        const jsonMatches = scriptContent.match(/\{[\s\S]*\}/g);
-        if (!jsonMatches) continue;
-
-        for (const jsonStr of jsonMatches) {
-          try {
-            const jsonData = JSON.parse(jsonStr);
-            
-            // Try to find video URL in various possible locations
-            const videoUrl = jsonData.video_url || jsonData.videoUrl || 
-                           jsonData.graphql?.shortcode_media?.video_url ||
-                           jsonData.entry_data?.PostPage?.[0]?.graphql?.shortcode_media?.video_url;
-            
-            if (videoUrl) {
-              return {
-                videoUrl,
-                thumbnail: jsonData.display_url || jsonData.thumbnailUrl ||
-                          jsonData.graphql?.shortcode_media?.display_url,
-                caption: jsonData.edge_media_to_caption?.edges?.[0]?.node?.text ||
-                         jsonData.caption || '',
-                username: jsonData.owner?.username || 
-                          jsonData.graphql?.shortcode_media?.owner?.username,
-                stats: {
-                  views: formatNumber(jsonData.video_view_count || 0),
-                  likes: formatNumber(jsonData.edge_media_preview_like?.count || 0),
-                  comments: formatNumber(jsonData.edge_media_to_comment?.count || 0),
-                },
-              };
-            }
-          } catch (e) {
-            continue;
-          }
-        }
-      } catch (e) {
-        continue;
-      }
-    }
-  }
-
-  return null;
-}
-
-/**
  * Format large numbers
  */
 function formatNumber(num: number): string {
@@ -174,35 +125,50 @@ export async function downloadVideoToBuffer(url: string): Promise<Buffer> {
 
 /**
  * Get Instagram Reels by username (for mass download)
+ * Note: This is a placeholder implementation
+ * The Pitucode API may not support username-based fetching
  */
 export async function getInstagramReelsByUsername(username: string): Promise<InstagramReelDownload[]> {
   try {
     const cleanUsername = username.replace('@', '').trim();
+    
+    // Try to fetch from profile URL
     const profileUrl = `https://www.instagram.com/${cleanUsername}/`;
     
-    const response = await axios.get(profileUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
+    const response = await axios.get(PITUCODE_API_URL, {
+      params: {
+        url: profileUrl,
       },
-      timeout: 15000,
+      headers: {
+        'x-api-key': PITUCODE_API_KEY,
+      },
+      timeout: 30000,
     });
 
-    const $ = cheerio.load(response.data);
-    const videoData = extractVideoDataFromPage($);
+    const data = response.data;
+
+    // Parse API response
+    if (!data || data.error) {
+      throw new Error(data?.message || 'Failed to fetch Instagram reels');
+    }
+
+    const reels = data.data || data.reels || [];
     
-    // If we found video data, return it
-    if (videoData) {
-      return [{
-        id: `${cleanUsername}_1`,
-        thumbnail: videoData.thumbnail || '',
-        videoUrl: videoData.videoUrl || '',
-        downloadUrl: videoData.videoUrl || '',
-        caption: videoData.caption || '',
-        username: cleanUsername,
-        stats: videoData.stats,
-      }];
+    // If API returns reels, format them
+    if (Array.isArray(reels) && reels.length > 0) {
+      return reels.map((reel: any, index: number) => ({
+        id: reel.id || `${cleanUsername}_${index}`,
+        thumbnail: reel.thumbnail || reel.cover || '',
+        videoUrl: reel.url || reel.video_url || '',
+        downloadUrl: reel.url || reel.download_url || reel.video_url || '',
+        caption: reel.caption || reel.description || '',
+        username: reel.username || reel.author || cleanUsername,
+        stats: {
+          views: formatNumber(reel.views || reel.view_count || 0),
+          likes: formatNumber(reel.likes || reel.like_count || 0),
+          comments: formatNumber(reel.comments || reel.comment_count || 0),
+        },
+      }));
     }
 
     // Fallback: Generate mock data for demo purposes
