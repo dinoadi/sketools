@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as fs from 'fs';
+import { OAuth2Client } from 'google-auth-library';
 
 export interface TikTokUploadOptions {
   title: string;
@@ -17,59 +17,147 @@ export interface TikTokUploadResult {
   shareUrl: string;
 }
 
+export interface TikTokOAuthConfig {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+}
+
 /**
- * TikTok Uploader Service
- * Note: TikTok doesn't have an official public API for uploads
- * This implementation uses web scraping approach (may break without notice)
- * For production, consider using TikTok Creator Portal or official partnerships
+ * TikTok Uploader Service with OAuth 2.0
+ * Uses TikTok's official OAuth 2.0 flow for authentication
  */
 export class TikTokUploader {
-  private sessionCookie: string;
-  private csrfToken: string;
+  private config: TikTokOAuthConfig;
+  private accessToken: string | null = null;
+  private refreshToken: string | null = null;
+  private tokenExpiresAt: number | null = null;
 
-  constructor(sessionCookie?: string) {
-    this.sessionCookie = sessionCookie || '';
-    this.csrfToken = '';
+  constructor(config: TikTokOAuthConfig) {
+    this.config = config;
   }
 
   /**
-   * Set session cookie (from browser login)
+   * Get OAuth authorization URL
    */
-  setSessionCookie(cookie: string) {
-    this.sessionCookie = cookie;
+  getAuthUrl(state?: string): string {
+    const params = new URLSearchParams({
+      client_key: this.config.clientId,
+      redirect_uri: this.config.redirectUri,
+      scope: 'user.info.basic,video.upload',
+      response_type: 'code',
+      state: state || 'random_state_' + Date.now(),
+    });
+
+    return `https://www.tiktok.com/v2/auth/authorize?${params.toString()}`;
   }
 
   /**
-   * Upload video from local file
+   * Exchange authorization code for access token
    */
-  async uploadVideo(options: TikTokUploadOptions): Promise<TikTokUploadResult> {
-    const {
-      title,
-      description,
-      hashtags = [],
-      privacyLevel = 'public_to_everyone',
-      videoPath,
-      onProgress,
-    } = options;
+  async exchangeCodeForToken(code: string): Promise<{
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+    token_type: string;
+  }> {
+    try {
+      const response = await axios.post(
+        'https://open.tiktokapis.com/v2/oauth/token/',
+        new URLSearchParams({
+          client_key: this.config.clientId,
+          client_secret: this.config.clientSecret,
+          code: code,
+          grant_type: 'authorization_code',
+          redirect_uri: this.config.redirectUri,
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
 
-    if (!videoPath) {
-      throw new Error('videoPath is required for local file upload');
+      const data = response.data.data;
+      
+      // Store tokens
+      this.accessToken = data.access_token;
+      this.refreshToken = data.refresh_token;
+      this.tokenExpiresAt = Date.now() + (data.expires_in * 1000);
+
+      return data;
+    } catch (error: any) {
+      console.error('Error exchanging code for token:', error.response?.data || error.message);
+      throw new Error('Failed to exchange authorization code for access token');
+    }
+  }
+
+  /**
+   * Refresh access token
+   */
+  async refreshAccessToken(): Promise<{
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+    token_type: string;
+  }> {
+    if (!this.refreshToken) {
+      throw new Error('No refresh token available');
     }
 
-    // Read video file
-    const videoBuffer = fs.readFileSync(videoPath);
-    const fileSize = videoBuffer.length;
+    try {
+      const response = await axios.post(
+        'https://open.tiktokapis.com/v2/oauth/token/',
+        new URLSearchParams({
+          client_key: this.config.clientId,
+          client_secret: this.config.clientSecret,
+          grant_type: 'refresh_token',
+          refresh_token: this.refreshToken,
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
 
-    // Upload to TikTok
-    return this.uploadVideoBuffer({
-      title,
-      description,
-      hashtags,
-      privacyLevel,
-      videoBuffer,
-      fileSize,
-      onProgress,
-    });
+      const data = response.data.data;
+      
+      // Update tokens
+      this.accessToken = data.access_token;
+      this.refreshToken = data.refresh_token;
+      this.tokenExpiresAt = Date.now() + (data.expires_in * 1000);
+
+      return data;
+    } catch (error: any) {
+      console.error('Error refreshing token:', error.response?.data || error.message);
+      throw new Error('Failed to refresh access token');
+    }
+  }
+
+  /**
+   * Set credentials directly (for already authenticated sessions)
+   */
+  setCredentials(accessToken: string, refreshToken?: string, expiresAt?: number) {
+    this.accessToken = accessToken;
+    this.refreshToken = refreshToken || null;
+    this.tokenExpiresAt = expiresAt || null;
+  }
+
+  /**
+   * Get valid access token, refreshing if necessary
+   */
+  private async getValidAccessToken(): Promise<string> {
+    if (!this.accessToken) {
+      throw new Error('No access token available. Please authenticate first.');
+    }
+
+    // Check if token is expired or will expire soon (5 minutes buffer)
+    if (this.tokenExpiresAt && Date.now() > this.tokenExpiresAt - 300000) {
+      await this.refreshAccessToken();
+    }
+
+    return this.accessToken!;
   }
 
   /**
@@ -88,6 +176,9 @@ export class TikTokUploader {
     if (!videoUrl) {
       throw new Error('videoUrl is required for URL upload');
     }
+
+    // Get valid access token
+    const accessToken = await this.getValidAccessToken();
 
     // Download video from URL
     const response = await axios.get(videoUrl, {
@@ -157,30 +248,76 @@ export class TikTokUploader {
     } = options;
 
     try {
-      // Note: This is a simplified implementation
-      // Real TikTok upload requires complex authentication and anti-bot measures
-      // For production, use TikTok Creator Portal API or official partnerships
+      const accessToken = await this.getValidAccessToken();
 
-      // Simulate upload progress
-      if (onProgress) {
-        for (let i = 0; i <= 100; i += 10) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-          onProgress(i);
+      // Step 1: Initialize upload
+      const initResponse = await axios.post(
+        'https://open.tiktokapis.com/v2/video/upload/',
+        {
+          video_size: fileSize,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
         }
-      }
+      );
 
-      // Return mock result (in real implementation, this would be the actual TikTok response)
-      const videoId = `tiktok_${Date.now()}`;
-      
+      const { data: { upload_url, video_id } } = initResponse.data;
+
+      // Step 2: Upload video file
+      await axios.put(upload_url, videoBuffer, {
+        headers: {
+          'Content-Type': 'video/mp4',
+          'Content-Range': `bytes 0-${fileSize - 1}/${fileSize}`,
+        },
+        onUploadProgress: (progressEvent) => {
+          if (onProgress && progressEvent.total) {
+            const progress = (progressEvent.loaded / progressEvent.total) * 100;
+            onProgress(Math.round(progress));
+          }
+        },
+      });
+
+      // Step 3: Publish video with metadata
+      const publishResponse = await axios.post(
+        'https://open.tiktokapis.com/v2/video/publish/',
+        {
+          video_id: video_id,
+          caption: this.formatCaption(description, hashtags),
+          privacy_level: privacyLevel,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const { data: { data: { video: { id, share_url, video_url } } } } = publishResponse.data;
+
       return {
-        videoId,
-        url: `https://www.tiktok.com/@user/video/${videoId}`,
-        shareUrl: `https://vm.tiktok.com/ZM${videoId}`,
+        videoId: id,
+        url: video_url,
+        shareUrl: share_url,
       };
     } catch (error: any) {
-      console.error('Error uploading to TikTok:', error.message);
-      throw new Error(`Failed to upload to TikTok: ${error.message}`);
+      console.error('Error uploading to TikTok:', error.response?.data || error.message);
+      throw new Error(`Failed to upload to TikTok: ${error.response?.data?.message || error.message}`);
     }
+  }
+
+  /**
+   * Format caption with hashtags
+   */
+  private formatCaption(description: string, hashtags: string[]): string {
+    const hashtagString = hashtags.map(tag => 
+      tag.startsWith('#') ? tag : `#${tag}`
+    ).join(' ');
+    
+    return `${description}\n\n${hashtagString}`;
   }
 
   /**
@@ -201,45 +338,91 @@ export class TikTokUploader {
   }
 
   /**
-   * Get video info (mock implementation)
+   * Get video info
    */
   async getVideoInfo(videoId: string) {
-    // In real implementation, this would fetch from TikTok API
-    return {
-      id: videoId,
-      title: 'Video Title',
-      description: 'Video Description',
-      stats: {
-        views: '0',
-        likes: '0',
-        shares: '0',
-        comments: '0',
-      },
-    };
+    const accessToken = await this.getValidAccessToken();
+
+    try {
+      const response = await axios.get(
+        `https://open.tiktokapis.com/v2/video/query/?ids=${videoId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      return response.data.data.videos[0];
+    } catch (error: any) {
+      console.error('Error getting video info:', error.response?.data || error.message);
+      throw new Error('Failed to get video info');
+    }
   }
 
   /**
-   * Delete video (mock implementation)
+   * Delete video
    */
   async deleteVideo(videoId: string): Promise<void> {
-    // In real implementation, this would call TikTok API
-    console.log(`Deleting TikTok video: ${videoId}`);
+    const accessToken = await this.getValidAccessToken();
+
+    try {
+      await axios.post(
+        'https://open.tiktokapis.com/v2/video/delete/',
+        {
+          video_id: videoId,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    } catch (error: any) {
+      console.error('Error deleting video:', error.response?.data || error.message);
+      throw new Error('Failed to delete video');
+    }
   }
 
   /**
-   * List uploaded videos (mock implementation)
+   * List uploaded videos
    */
-  async listVideos(maxResults = 50) {
-    // In real implementation, this would fetch from TikTok API
-    return [];
+  async listVideos(maxResults = 50, cursor?: string) {
+    const accessToken = await this.getValidAccessToken();
+
+    try {
+      const params: any = {
+        max_count: maxResults,
+      };
+
+      if (cursor) {
+        params.cursor = cursor;
+      }
+
+      const response = await axios.get(
+        'https://open.tiktokapis.com/v2/video/list/',
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          params,
+        }
+      );
+
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error listing videos:', error.response?.data || error.message);
+      throw new Error('Failed to list videos');
+    }
   }
 }
 
 /**
  * Create TikTok uploader instance
  */
-export function createTikTokUploader(sessionCookie?: string): TikTokUploader {
-  return new TikTokUploader(sessionCookie);
+export function createTikTokUploader(config: TikTokOAuthConfig): TikTokUploader {
+  return new TikTokUploader(config);
 }
 
 /**

@@ -3,6 +3,7 @@ import { requireServerSession } from "@/lib/auth/require-session";
 import { listConnectedAccounts } from "@/lib/firestore/repositories";
 import { YouTubeLogo } from "@/components/logos/youtube-logo";
 import { TikTokLogo } from "@/components/logos/tiktok-logo";
+import { TikTokConnectButton } from "@/components/auth/tiktok-connect-button";
 
 export default async function ConnectedAccountsPage() {
   const session = await requireServerSession();
@@ -123,12 +124,19 @@ function ProviderCard({
         <p className="mt-3 text-sm leading-6 text-white/70">
           {description}
         </p>
-        <button
-          type="button"
-          className={`interactive-btn mt-4 inline-flex items-center rounded-xl border-2 bg-gradient-to-r ${color} px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105`}
-        >
-          ✨ Connect (MVP Stub)
-        </button>
+        {title === "TikTok" ? (
+          <TikTokConnectButton 
+            className="mt-4 w-full"
+            label={isConnected ? "Connected" : "Connect TikTok"}
+          />
+        ) : (
+          <button
+            type="button"
+            className={`interactive-btn mt-4 inline-flex items-center rounded-xl border-2 bg-gradient-to-r ${color} px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105`}
+          >
+            ✨ Connect (MVP Stub)
+          </button>
+        )}
       </div>
     </article>
   );

@@ -3,6 +3,13 @@ import { requireApiUser } from "@/lib/auth/api-user";
 import { createJob } from "@/lib/firestore/repositories";
 import { TikTokUploader } from "@/lib/uploaders/tiktok-uploader";
 
+// TikTok OAuth configuration
+const TIKTOK_CONFIG = {
+  clientId: process.env.TIKTOK_CLIENT_ID || 'awxg5h05uy9ok7sf',
+  clientSecret: process.env.TIKTOK_CLIENT_SECRET || 'bxvJmq3pIkE43FMVynSeIB1QHirsxzMn',
+  redirectUri: process.env.TIKTOK_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/tiktok/callback`,
+};
+
 export async function POST(request: Request) {
   const { session, error } = await requireApiUser();
   if (error || !session) return error!;
@@ -66,15 +73,25 @@ export async function POST(request: Request) {
 async function processTikTokUpload(userId: string, options: any, jobId: string) {
   try {
     // Get TikTok credentials from user's connected accounts
-    // Note: You'll need to implement this based on your auth system
     const credentials = await getTikTokCredentials(userId);
     
     if (!credentials) {
       throw new Error('TikTok account not connected');
     }
 
-    // Initialize TikTok uploader
-    const uploader = new TikTokUploader(credentials.sessionCookie);
+    // Initialize TikTok uploader with OAuth config
+    const uploader = new TikTokUploader({
+      clientId: TIKTOK_CONFIG.clientId,
+      clientSecret: TIKTOK_CONFIG.clientSecret,
+      redirectUri: TIKTOK_CONFIG.redirectUri,
+    });
+    
+    // Set credentials from stored tokens
+    uploader.setCredentials(
+      credentials.accessToken,
+      credentials.refreshToken,
+      credentials.expiresAt
+    );
     
     // Upload video
     const result = await uploader.uploadVideoFromUrl({
@@ -105,8 +122,35 @@ async function processTikTokUpload(userId: string, options: any, jobId: string) 
  * Get TikTok credentials from user's connected accounts
  * Note: This is a placeholder - implement based on your auth system
  */
-async function getTikTokCredentials(userId: string): Promise<any> {
-  // TODO: Implement this function to retrieve TikTok session cookie
+async function getTikTokCredentials(userId: string): Promise<{
+  accessToken: string;
+  refreshToken?: string;
+  expiresAt?: number;
+} | null> {
+  // TODO: Implement this function to retrieve TikTok OAuth tokens
   // from your database or user's connected accounts
+  // This should query Firestore for the user's connected TikTok account
+  // and return the stored access token, refresh token, and expiration time
+  
+  // Example implementation:
+  // const db = getFirestore();
+  // const snapshot = await db.collection('connected_accounts')
+  //   .where('userId', '==', userId)
+  //   .where('provider', '==', 'tiktok')
+  //   .where('status', '==', 'active')
+  //   .limit(1)
+  //   .get();
+  // 
+  // if (snapshot.empty) return null;
+  // 
+  // const doc = snapshot.docs[0];
+  // const data = doc.data();
+  // 
+  // return {
+  //   accessToken: data.tokenCiphertext, // decrypted
+  //   refreshToken: data.refreshTokenCiphertext, // decrypted
+  //   expiresAt: data.tokenExpiresAt ? new Date(data.tokenExpiresAt).getTime() : undefined,
+  // };
+  
   return null;
 }
