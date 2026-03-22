@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Pitucode API configuration
-const PITUCODE_API_KEY = process.env.PITUCODE_API_KEY || 'YOURAPIKEY';
+const PITUCODE_API_KEY = process.env.PITUCODE_API_KEY || '7C0dEc80d39';
 const PITUCODE_API_URL = 'https://api.pitucode.com/instagram-downloader';
 
 export interface InstagramReelDownload {
