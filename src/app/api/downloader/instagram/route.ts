@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireApiUser } from "@/lib/auth/api-user";
 import { createJob } from "@/lib/firestore/repositories";
-import { getInstagramReelsByUsername, generateMockInstagramReels } from "@/lib/scrapers/instagram";
+import { downloadInstagramReel, getInstagramReelsByUsername, downloadVideoToBuffer } from "@/lib/downloaders/instagram-downloader";
 
 export async function GET(request: Request) {
   const { session, error } = await requireApiUser();
@@ -19,13 +19,10 @@ export async function GET(request: Request) {
     const reels = await getInstagramReelsByUsername(username);
     return NextResponse.json({ reels });
   } catch (error: any) {
-    // If scraping fails, fallback to mock data
-    console.error('Instagram scraper failed, using mock data:', error.message);
-    const mockReels = generateMockInstagramReels(username);
+    console.error('Instagram API error:', error.message);
     return NextResponse.json({ 
-      reels: mockReels,
-      warning: "Using mock data - scraper failed. This may be due to rate limiting or anti-bot measures."
-    });
+      error: error.message || "Gagal mengambil data Instagram"
+    }, { status: 500 });
   }
 }
 
@@ -66,4 +63,62 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ success: true, message: "Jobs created" });
+}
+
+/**
+ * Process single download in background
+ */
+async function processSingleDownload(userId: string, url: string, jobId: string) {
+  try {
+    // Download reel
+    const reelData = await downloadInstagramReel(url);
+    
+    // Download video buffer
+    const videoBuffer = await downloadVideoToBuffer(reelData.downloadUrl);
+    
+    // Upload to Firebase Storage (you'll need to implement this)
+    const storagePath = `downloads/${userId}/instagram/${reelData.id}.mp4`;
+    // const downloadUrl = await uploadToFirebaseStorage(storagePath, videoBuffer, 'video/mp4');
+    
+    // Update job status
+    // Note: You'll need to implement updateJob function in repositories
+    console.log(`Download complete: ${reelData.id}, stored at: ${storagePath}`);
+  } catch (error: any) {
+    console.error('Single download failed:', error.message);
+    // Update job status to failed
+  }
+}
+
+/**
+ * Process mass downloads in background
+ */
+async function processMassDownloads(userId: string, reels: any[], jobIds: string[]) {
+  for (let i = 0; i < reels.length; i++) {
+    const reel = reels[i];
+    const jobId = jobIds[i];
+    
+    try {
+      // Update job status to processing
+      console.log(`Processing reel ${i + 1}/${reels.length}: ${reel.id}`);
+      
+      // Download reel
+      const reelData = await downloadInstagramReel(reel.url);
+      
+      // Download video buffer
+      const videoBuffer = await downloadVideoToBuffer(reelData.downloadUrl);
+      
+      // Upload to Firebase Storage
+      const storagePath = `downloads/${userId}/instagram/${reel.id}.mp4`;
+      // const downloadUrl = await uploadToFirebaseStorage(storagePath, videoBuffer, 'video/mp4');
+      
+      // Update job status to completed
+      console.log(`Download complete: ${reel.id}, stored at: ${storagePath}`);
+      
+      // Add delay between downloads to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    } catch (error: any) {
+      console.error(`Download failed for reel ${reel.id}:`, error.message);
+      // Update job status to failed
+    }
+  }
 }

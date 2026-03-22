@@ -1,7 +1,9 @@
 export type ToolKey =
   | "instagram-downloader"
   | "youtube-scheduler"
+  | "youtube-uploader"
   | "tiktok-scheduler"
+  | "tiktok-uploader"
   | "tiktok-viewer";
 
 export type JobStatus =
